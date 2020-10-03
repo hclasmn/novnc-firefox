@@ -9,7 +9,8 @@ on:
     # Publish `v1.2.3` tags as releases.
     tags:
       - v*
-
+    watch:
+        types: [started]
   # Run tests for any PRs.
   pull_request:
        branches:
@@ -22,29 +23,14 @@ env:
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-  test:
-    runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Run tests
-        run: |
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile
-          fi
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
   push:
     # Ensure test job passes before pushing image.
-    needs: test
+
 
     runs-on: ubuntu-latest
 #    if: github.event_name == 'push'
-
+    if: github.event.repository.owner.id == github.event.sender.id
     steps:
       - uses: actions/checkout@v2
 
